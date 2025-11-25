@@ -72,6 +72,9 @@ public class EnergyService {
     }
 
     public ChargingWindowDto findBestChargingWindow(int hours) {
+        if (hours < 1 || hours > 6) {
+            throw new IllegalArgumentException("Charging window must be between 1 and 6");
+        }
         LocalDate today = LocalDate.now();
         List<GenerationData> data = client.fetchGenerationData(today.toString(), today.plusDays(1).toString());
 
@@ -115,9 +118,10 @@ public class EnergyService {
         }
 
         GenerationData startInterval = sortedData.get(bestStartIndex);
+        GenerationData endInterval = sortedData.get(bestStartIndex + hours);
         double finalAverage = maxCleanSum / slotsNeeded;
 
-        return new ChargingWindowDto(startInterval.getFrom(), finalAverage);
+        return new ChargingWindowDto(sortedData.get(bestStartIndex).getFrom(), sortedData.get(bestStartIndex + slotsNeeded - 1).getTo(), finalAverage);
     }
 
     private double calculateCleanEnergyPercentage(GenerationData generationData) {
@@ -125,17 +129,5 @@ public class EnergyService {
                 .filter(fuel -> CLEAN_SOURCES.contains(fuel.getFuel()))
                 .mapToDouble(FuelMix::getPerc)
                 .sum();
-    }
-
-    private Map<String, Double> calculateHourByHourAverage(LocalDate key, List<GenerationData> value) {
-        Map<String, Double> dailyMix = new HashMap<>();
-        for (GenerationData interval : value) {
-            for (FuelMix fuel : interval.getGenerationmix()) {
-                if(CLEAN_SOURCES.contains(fuel.getFuel())) {
-                    dailyMix.merge(interval.getFrom(), fuel.getPerc(), Double::sum);
-                }
-            }
-        }
-        return dailyMix;
     }
 }

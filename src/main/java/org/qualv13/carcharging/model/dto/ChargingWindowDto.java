@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChargingWindowDto {
-    private String StartTime;
-    private double CleanEnergyPercent;
+    private String startTime;
+    private String endTime;
+    private double cleanEnergyPercent;
 }

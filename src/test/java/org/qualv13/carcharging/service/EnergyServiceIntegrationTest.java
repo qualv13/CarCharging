@@ -22,11 +22,11 @@ class EnergyServiceIntegrationTest {
         System.out.println("--- Downloading data ---");
 
         // Sliding Window test
-        ChargingWindowDto window = service.findBestChargingWindow(1);
+        ChargingWindowDto window = service.findBestChargingWindow(5);
         if (window != null) {
             System.out.println("Window found!");
             System.out.println("Start: " + window.getStartTime());
-            //System.out.println("End: " + window.getEndTime());
+            System.out.println("End: " + window.getEndTime());
             System.out.println("Clean energy: " + window.getCleanEnergyPercent() + "%");
         } else {
             System.out.println("Failed to find window");
