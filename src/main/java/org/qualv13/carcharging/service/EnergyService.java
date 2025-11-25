@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,7 +30,7 @@ public class EnergyService {
     public List<DailyMixDto> getEnergyMixForComingDays() {
         // 1. Pobierz dane na 3 dni (Client)
         LocalDate today = LocalDate.now();
-        List<GenerationData> data = client.fetchGenerationData(today.toString(), today.plusDays(3).toString());
+        List<GenerationData> data = client.fetchGenerationData(today.toString(), today.plusDays(2).toString());
         // 2. Zgrupuj dane po dniu (Java Streams)
         if (data.isEmpty() || data == null) {
             return Collections.emptyList();
@@ -44,25 +46,39 @@ public class EnergyService {
             result.add(dailyMixDto);
         }
         // 4. Zwróć listę DTO
+        result.sort(Comparator.comparing(DailyMixDto::getDate));
         return result; // TODO: Implementacja
     }
 
-    private LocalDate parseDateFromInterval(GenerationData generationData) {
-        return Instant.parse(generationData.getFrom()).atZone(ZoneId.of("UTC")).toLocalDate();
+    private LocalDate parseDateFromInterval(GenerationData item) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm'Z'");
+        return LocalDateTime.parse(item.getFrom(), formatter).toLocalDate();
     }
 
     private DailyMixDto calculateDailyAverage(LocalDate key, List<GenerationData> value) {
         Map<String, Double> dailyMix = new HashMap<>();
-        for (GenerationData generationData : value) {
-            for (FuelMix source : value.getGenerationmix()) {
-
+        for (GenerationData interval : value) {
+            for (FuelMix fuel : interval.getGenerationmix()) {
+                dailyMix.merge(fuel.getFuel(), fuel.getPerc(), Double::sum);
             }
         }
+        Map<String, Double> dailyMixAvg= new HashMap<>();
+        double cleanEnergySum = 0;
+        for (Map.Entry<String, Double> entry : dailyMix.entrySet()) {
+            double avg = entry.getValue()/value.size();
+            dailyMixAvg.put(entry.getKey(), avg);
+            if(CLEAN_SOURCES.contains(entry.getKey())) {
+                cleanEnergySum += avg;
+            }
+        }
+        return new DailyMixDto(key.toString(), cleanEnergySum, dailyMixAvg);
     }
 
     // ZADANIE B: Algorytm Smart Charging
     public ChargingWindowDto findBestChargingWindow(int hours) {
         // 1. Pobierz dane prognozowane (Client)
+        LocalDate today = LocalDate.now();
+
         // 2. Użyj algorytmu "Sliding Window" (ten z poprzedniej mojej odpowiedzi)
         // 3. Znajdź okno z najwyższą średnią
         return null; // TODO: Implementacja
