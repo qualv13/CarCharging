@@ -11,39 +11,32 @@ import java.util.List;
 
 class EnergyServiceIntegrationTest {
 
-//    @Test
-//    void shouldCalculateBestWindowUsingRealApi() {
-//        // 1. Tworzymy prawdziwy "silnik" HTTP
-//        RestTemplate realRestTemplate = new RestTemplate();
-//
-//        // 2. Tworzymy Twój klienta, który faktycznie uderzy do api.carbonintensity.org.uk
-//        CarbonIntensityClient realClient = new CarbonIntensityClient(realRestTemplate);
-//
-//        // 3. Tworzymy serwis oparty na prawdziwym kliencie
-//        EnergyService service = new EnergyService(realClient);
-//
-//        // --- TESTOWANIE ---
-//
-//        System.out.println("--- Rozpoczynam pobieranie danych z Wielkiej Brytanii... ---");
-//
-//        // Test 1: Sprawdźmy, czy algorytm znajdzie okno ładowania (np. 1-godzinne)
-//        ChargingWindowDto window = service.findBestChargingWindow(1);
-//
-//        // Wypiszmy wynik w konsoli, żebyś widział, że to działa
-//        if (window != null) {
-//            System.out.println("Znaleziono najlepsze okno!");
-//            System.out.println("Start: " + window.getStartTime());
-//            System.out.println("Koniec: " + window.getEndTime());
-//            System.out.println("Czysta energia: " + window.getCleanEnergyPercent() + "%");
-//        } else {
-//            System.out.println("Nie udało się wyznaczyć okna (czy API działa?)");
-//        }
-//
-//        // Asercje (Warunki zaliczenia testu)
-//        Assertions.assertNotNull(window, "Okno nie powinno być nullem - API powinno zwrócić dane");
-//        Assertions.assertTrue(window.getCleanEnergyPercent() >= 0, "Procent nie może być ujemny");
-//        Assertions.assertNotNull(window.getStartTime(), "Musi być data startu");
-//    }
+    @Test
+    void shouldCalculateBestWindowUsingRealApi() {
+        RestTemplate realRestTemplate = new RestTemplate();
+        CarbonIntensityClient realClient = new CarbonIntensityClient(realRestTemplate);
+        EnergyService service = new EnergyService(realClient);
+
+        // Test start
+
+        System.out.println("--- Downloading data ---");
+
+        // Sliding Window test
+        ChargingWindowDto window = service.findBestChargingWindow(1);
+        if (window != null) {
+            System.out.println("Window found!");
+            System.out.println("Start: " + window.getStartTime());
+            //System.out.println("End: " + window.getEndTime());
+            System.out.println("Clean energy: " + window.getCleanEnergyPercent() + "%");
+        } else {
+            System.out.println("Failed to find window");
+        }
+
+        // Assertion checks
+        Assertions.assertNotNull(window, "Window can't be null");
+        Assertions.assertTrue(window.getCleanEnergyPercent() >= 0, "Percent can't be less than 0");
+        Assertions.assertNotNull(window.getStartTime(), "Window start date must be provided");
+    }
 
     @Test
     void shouldGetDailyMixUsingRealApi() {
@@ -51,15 +44,14 @@ class EnergyServiceIntegrationTest {
         CarbonIntensityClient realClient = new CarbonIntensityClient(realRestTemplate);
         EnergyService service = new EnergyService(realClient);
 
-        // Pobranie miksu na 3 dni
         List<DailyMixDto> mix = service.getEnergyMixForComingDays();
 
-        System.out.println("--- Pobrano miks energetyczny na " + mix.size() + " dni ---");
+        System.out.println("--- Got energy mix for " + mix.size() + " days ---");
         mix.forEach(day -> {
-            System.out.println("Dzień: " + day.getDate() + ", Czysta energia: " + day.getCleanEnergyPercent() + "%");
+            System.out.println("Day: " + day.getDate() + "\nClean energy: " + day.getCleanEnergyPercent() + "%");
         });
 
-        Assertions.assertFalse(mix.isEmpty(), "Lista dni nie powinna być pusta");
-        Assertions.assertEquals(3, mix.size(), "Powinniśmy dostać dane na 3 dni (Dziś, Jutro, Pojutrze)"); // Czasem API zwraca mniej pod koniec dnia, ale celujemy w 3
+        Assertions.assertFalse(mix.isEmpty(), "List of days can't be empty");
+        Assertions.assertEquals(3, mix.size(), "Number of days should be equal 3");
     }
 }

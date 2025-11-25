@@ -1,5 +1,6 @@
 package org.qualv13.carcharging.service;
 
+import ch.qos.logback.core.joran.sanity.Pair;
 import org.qualv13.carcharging.client.CarbonIntensityClient;
 import org.qualv13.carcharging.model.dto.ChargingWindowDto;
 import org.qualv13.carcharging.model.dto.DailyMixDto;
@@ -26,13 +27,10 @@ public class EnergyService {
         this.client = client;
     }
 
-    // Dane do wykresów
     public List<DailyMixDto> getEnergyMixForComingDays() {
-        // 1. Pobierz dane na 3 dni (Client)
         LocalDate today = LocalDate.now();
         List<GenerationData> data = client.fetchGenerationData(today.toString(), today.plusDays(2).toString());
-        // 2. Zgrupuj dane po dniu (Java Streams)
-        if (data.isEmpty() || data == null) {
+        if (data.isEmpty()) {
             return Collections.emptyList();
         }
 
@@ -40,14 +38,13 @@ public class EnergyService {
                 .collect(Collectors.groupingBy(this::parseDateFromInterval));
 
         List<DailyMixDto> result = new ArrayList<>();
-        // 3. Policz średnie dla każdego paliwa
+        // Average percent of fuels
         for (Map.Entry<LocalDate, List<GenerationData>> entry : groupedByDate.entrySet()) {
             DailyMixDto dailyMixDto = calculateDailyAverage(entry.getKey(), entry.getValue());
             result.add(dailyMixDto);
         }
-        // 4. Zwróć listę DTO
         result.sort(Comparator.comparing(DailyMixDto::getDate));
-        return result; // TODO: Implementacja
+        return result;
     }
 
     private LocalDate parseDateFromInterval(GenerationData item) {
@@ -74,13 +71,71 @@ public class EnergyService {
         return new DailyMixDto(key.toString(), cleanEnergySum, dailyMixAvg);
     }
 
-    // ZADANIE B: Algorytm Smart Charging
     public ChargingWindowDto findBestChargingWindow(int hours) {
-        // 1. Pobierz dane prognozowane (Client)
         LocalDate today = LocalDate.now();
+        List<GenerationData> data = client.fetchGenerationData(today.toString(), today.plusDays(1).toString());
 
-        // 2. Użyj algorytmu "Sliding Window" (ten z poprzedniej mojej odpowiedzi)
-        // 3. Znajdź okno z najwyższą średnią
-        return null; // TODO: Implementacja
+        if (data.isEmpty()) {
+            throw new RuntimeException("No API data provided");
+        }
+
+        List<GenerationData> sortedData = data.stream()
+                .sorted(Comparator.comparing(GenerationData::getFrom))
+                .toList();
+
+        int slotsNeeded = hours * 2;
+
+        if (sortedData.size() < slotsNeeded) {
+            throw new IllegalArgumentException("Not enough data to calculate charging for " + hours + "h");
+        }
+
+        double maxCleanSum = -1.0;
+        int bestStartIndex = -1;
+        double currentWindowSum = 0.0;
+
+        for (int i = 0; i < sortedData.size(); i++) {
+            double cleanPercInSlot = calculateCleanEnergyPercentage(sortedData.get(i));
+            currentWindowSum += cleanPercInSlot;
+
+            if (i >= slotsNeeded) {
+                double cleanPercLeaving = calculateCleanEnergyPercentage(sortedData.get(i - slotsNeeded));
+                currentWindowSum -= cleanPercLeaving;
+            }
+
+            if (i >= slotsNeeded - 1) {
+                if (currentWindowSum > maxCleanSum) {
+                    maxCleanSum = currentWindowSum;
+                    bestStartIndex = i - slotsNeeded + 1;
+                }
+            }
+        }
+
+        if (bestStartIndex == -1) {
+            return null;
+        }
+
+        GenerationData startInterval = sortedData.get(bestStartIndex);
+        double finalAverage = maxCleanSum / slotsNeeded;
+
+        return new ChargingWindowDto(startInterval.getFrom(), finalAverage);
+    }
+
+    private double calculateCleanEnergyPercentage(GenerationData generationData) {
+        return generationData.getGenerationmix().stream()
+                .filter(fuel -> CLEAN_SOURCES.contains(fuel.getFuel()))
+                .mapToDouble(FuelMix::getPerc)
+                .sum();
+    }
+
+    private Map<String, Double> calculateHourByHourAverage(LocalDate key, List<GenerationData> value) {
+        Map<String, Double> dailyMix = new HashMap<>();
+        for (GenerationData interval : value) {
+            for (FuelMix fuel : interval.getGenerationmix()) {
+                if(CLEAN_SOURCES.contains(fuel.getFuel())) {
+                    dailyMix.merge(interval.getFrom(), fuel.getPerc(), Double::sum);
+                }
+            }
+        }
+        return dailyMix;
     }
 }

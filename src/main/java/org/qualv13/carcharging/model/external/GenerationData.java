@@ -5,9 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;
 
-@Data // Generuje Gettery, Settery, toString, equals, hashCode
-@AllArgsConstructor // Generuje konstruktor ze wszystkimi polami (przydatne w testach)
-@NoArgsConstructor // Generuje pusty konstruktor (WYMAGANE przez Jacksona do JSON)
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class GenerationData {
 
     private String from;

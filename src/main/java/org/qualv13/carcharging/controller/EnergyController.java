@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/energy")
-@CrossOrigin(origins = "*") // Ważne dla Frontendu na innej domenie!
+@CrossOrigin(origins = "*")
 public class EnergyController {
 
     private final EnergyService energyService;
