@@ -24,7 +24,9 @@ public class EnergyService {
 
     public List<DailyMixDto> getEnergyMixForComingDays() {
         LocalDate today = LocalDate.now();
-        List<GenerationData> data = client.fetchGenerationData(today.toString(), today.plusDays(2).toString());
+
+        List<GenerationData> data = client.fetchGenerationData(today.toString(), today.plusDays(3).toString());
+
         if (data.isEmpty()) {
             return Collections.emptyList();
         }
@@ -33,12 +35,13 @@ public class EnergyService {
                 .collect(Collectors.groupingBy(this::parseDateFromInterval));
 
         List<DailyMixDto> result = new ArrayList<>();
-        // Average percent of fuels
+
         for (Map.Entry<LocalDate, List<GenerationData>> entry : groupedByDate.entrySet()) {
             DailyMixDto dailyMixDto = calculateDailyAverage(entry.getKey(), entry.getValue());
             result.add(dailyMixDto);
         }
         result.sort(Comparator.comparing(DailyMixDto::getDate));
+        result.remove(0);
         return result;
     }
 

@@ -7,7 +7,8 @@ import org.qualv13.carcharging.model.external.GenerationData;
 import org.qualv13.carcharging.util.EnergyConstants;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 
@@ -24,21 +25,31 @@ public class ChargingService {
         if (hours < 1 || hours > 6) {
             throw new IllegalArgumentException("Charging window must be between 1 and 6");
         }
-        LocalDate today = LocalDate.now();
-        List<GenerationData> data = client.fetchGenerationData(today.toString(), today.plusDays(1).toString());
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime limit = now.plusHours(48);
+
+        List<GenerationData> data = client.fetchGenerationData(
+                now.toLocalDate().toString(),
+                now.toLocalDate().plusDays(3).toString()
+        );
 
         if (data.isEmpty()) {
             throw new RuntimeException("No API data provided");
         }
 
         List<GenerationData> sortedData = data.stream()
+                .filter(slot -> {
+                    LocalDateTime slotTime = LocalDateTime.parse(slot.getFrom(), DateTimeFormatter.ISO_DATE_TIME);
+                    return (slotTime.isEqual(now) || slotTime.isAfter(now)) && slotTime.isBefore(limit);
+                })
                 .sorted(Comparator.comparing(GenerationData::getFrom))
                 .toList();
 
         int slotsNeeded = hours * 2;
 
         if (sortedData.size() < slotsNeeded) {
-            throw new IllegalArgumentException("Not enough data to calculate charging for " + hours + "h");
+            throw new IllegalArgumentException("Not enough future data to calculate charging for " + hours + "h. Available slots: " + sortedData.size());
         }
 
         double maxCleanSum = -1.0;
@@ -68,7 +79,11 @@ public class ChargingService {
 
         double finalAverage = maxCleanSum / slotsNeeded;
 
-        return new ChargingWindowDto(sortedData.get(bestStartIndex).getFrom(), sortedData.get(bestStartIndex + slotsNeeded - 1).getTo(), finalAverage);
+        return new ChargingWindowDto(
+                sortedData.get(bestStartIndex).getFrom(),
+                sortedData.get(bestStartIndex + slotsNeeded - 1).getTo(),
+                finalAverage
+        );
     }
 
     private double calculateCleanEnergyPercentage(GenerationData generationData) {
