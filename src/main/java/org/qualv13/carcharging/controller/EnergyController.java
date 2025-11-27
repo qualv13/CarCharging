@@ -1,6 +1,5 @@
 package org.qualv13.carcharging.controller;
 
-import org.qualv13.carcharging.model.dto.ChargingWindowDto;
 import org.qualv13.carcharging.model.dto.DailyMixDto;
 import org.qualv13.carcharging.service.EnergyService;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +22,4 @@ public class EnergyController {
         return energyService.getEnergyMixForComingDays();
     }
 
-    @GetMapping("/best-window")
-    public ChargingWindowDto getBestWindow(@RequestParam int hours) {
-        return energyService.findBestChargingWindow(hours);
-    }
 }
