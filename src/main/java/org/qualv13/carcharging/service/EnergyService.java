@@ -24,7 +24,7 @@ public class EnergyService {
 
     public List<DailyMixDto> getEnergyMixForComingDays() {
         LocalDate today = LocalDate.now();
-
+        LocalDateTime startOfToday = today.atStartOfDay();
         List<GenerationData> data = client.fetchGenerationData(today.toString(), today.plusDays(3).toString());
 
         if (data.isEmpty()) {
@@ -32,6 +32,10 @@ public class EnergyService {
         }
 
         Map<LocalDate, List<GenerationData>> groupedByDate = data.stream()
+                .filter(slot -> {
+                    LocalDateTime slotStart = LocalDateTime.parse(slot.getFrom(), DateTimeFormatter.ISO_DATE_TIME);
+                    return !slotStart.isBefore(startOfToday);
+                })
                 .collect(Collectors.groupingBy(this::parseDateFromInterval));
 
         List<DailyMixDto> result = new ArrayList<>();
@@ -41,13 +45,11 @@ public class EnergyService {
             result.add(dailyMixDto);
         }
         result.sort(Comparator.comparing(DailyMixDto::getDate));
-        result.remove(0);
         return result;
     }
 
     private LocalDate parseDateFromInterval(GenerationData item) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm'Z'");
-        return LocalDateTime.parse(item.getFrom(), formatter).toLocalDate();
+        return java.time.ZonedDateTime.parse(item.getFrom()).toLocalDate();
     }
 
     private DailyMixDto calculateDailyAverage(LocalDate key, List<GenerationData> value) {

@@ -1,6 +1,10 @@
 # CarCharging 🚗⚡
 
-App that provides information about percent of clean energy in next 3 days and let you calculate green window for charging your car in next 48 hours!
+App (backend) that provides information about percent of clean energy in next 3 days and let you calculate green window for charging your car in next 48 hours!
+
+Do you want a preview? [Here you can check it!](https://nextjs-render-fuqh.onrender.com/)
+
+[Link to frontend repo](https://github.com/qualv13/nextjs-render)
 
 ## 🛠️ Technologies used
 
@@ -9,42 +13,68 @@ App that provides information about percent of clean energy in next 3 days and l
 * **Container:** [Docker]
 * **API:** [NESO API](https://carbon-intensity.github.io/api-definitions/?java#get-generation-from-to)
 
-## 📂 Files
-
-Żebyś nie musiał błądzić jak w labiryncie, oto szybka rozpiska katalogów:
+## 📂 Project structure
 
 ```text
 src/
 ├── main/java/org/qualv13/carcharging/
 │   ├── client/         # API communication
-│   │   └── CarbonIntensityClient  # API from carbonintensity.org.uk
+│   │   └── CarbonIntensityClient    # API from carbonintensity.org.uk
 │   │
 │   ├── config/         # REST config
-│   │   ├── RestClientConfig       # Konfiguracja klienta HTTP
-│   │   └── WebConfig              # Ustawienia sieciowe
+│   │   ├── RestClientConfig         # HTTP
+│   │   └── WebConfig                # Web
 │   │
-│   ├── controller/     # endpoints for frontend
+│   ├── controller/     # Endpoints for frontend
 │   │   ├── ChargingController  
 │   │   └── EnergyController      
 │   │
 │   ├── model/          # Data structures
-│   │   ├── dto/                   # data transfer objects
+│   │   ├── dto/                 # data transfer objects
 │   │   │   ├── ChargingWindowDto
 │   │   │   └── DailyMixDto
-│   │   └── external/              # Data from external sources (API)
+│   │   └── external/            # data from external sources (API)
 │   │       ├── CarbonApiResponse
 │   │       ├── FuelMix
 │   │       └── GenerationData
 │   │
 │   ├── service/        # Logic
-│   │   └── EnergyService          # Calculating energy stuff
+│   │   └── EnergyService            # calculating mix for upcoming days
+│   │   └── ChargingService          # calculating charging window
 │   │
-│   └── CarChargingApplication.java # App start
+│   ├── util/           # Utilities
+│   │   └── EnergyConstants          # set of clean energy names
+│   │
+│   └── CarChargingApplication.java  # app start
 │
 └── test/               # Tests
     └── .../service/
+        ├── ChargingServiceTest      # test of ChargingService.java
         ├── EnergyServiceIntegrationTest
-        └── EnergyServiceTest
+        └── EnergyServiceTest        # test of EnergyService.java
 ```
 ## 🚀 How to run it?
-_TBAdded_
+
+In terminal inside project write
+```bash
+docker build -t carcharging
+```
+and then
+```bash
+docker run -p 8080:8080 carcharging
+```
+
+_I like Docker, okay?_
+
+if you don't - sure, here is easier version
+
+```bash
+mvn spring-boot:run
+```
+
+or in IntelliJ
+
+find CarChargingApplication.java in src/main/java/.../carcharging and click "Run" next to class name
+
+## Additional
+Feel free to write DMs to me about service and how to improve my work:D
