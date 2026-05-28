@@ -1,42 +1,219 @@
-# CarCharging 🚗⚡
+<p align="center">
+  <img src="./assets/carcharging-banner.png" alt="CarCharging banner" width="100%" />
+</p>
 
-App (backend) that provides information about percent of clean energy in next 3 days and let you calculate green window for charging your car in next 48 hours!
+<h1 align="center">CarCharging</h1>
 
-Do you want a preview? [Here you can check it!](https://nextjs-render-fuqh.onrender.com/)
+<p align="center">
+  EV charging decision backend that analyzes UK grid carbon-intensity data and recommends the cleanest charging window in the next 48 hours.
+</p>
 
-[Link to frontend repo](https://github.com/qualv13/nextjs-render)
+<p align="center">
+  <a href="https://github.com/qualv13/CarCharging"><img src="https://img.shields.io/badge/GitHub-CarCharging-181717?style=for-the-badge&logo=github" alt="GitHub"></a>
+  <img src="https://img.shields.io/badge/Java-17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 17">
+  <img src="https://img.shields.io/badge/Spring_Boot-3.3.5-6DB33F?style=for-the-badge&logo=springboot&logoColor=white" alt="Spring Boot 3.3.5">
+  <img src="https://img.shields.io/badge/REST_API-NESO_Carbon_Intensity-0A66C2?style=for-the-badge" alt="NESO API">
+  <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
+</p>
 
-## 🛠️ Technologies used
+<p align="center">
+  <a href="https://nextjs-render-fuqh.onrender.com/">Live frontend preview</a>
+  ·
+  <a href="https://github.com/qualv13/nextjs-render">Frontend repository</a>
+</p>
 
-* **Backend:** [Java 17 + Spring Boot 3.3.5]
-* **Frontend:** [React + TypeScript]
-* **Container:** [Docker]
-* **API:** [NESO API](https://carbon-intensity.github.io/api-definitions/?java#get-generation-from-to)
+---
 
-## 🔚💠 API Endpoints
+## Overview
 
-App provides API as said above from any source.
+**CarCharging** is a Spring Boot backend that helps EV owners charge when the grid is cleanest rather than simply when electricity is available.
 
-### Best window to charge car for 3 hours in upcoming 48h window
-```http
-GET /api/charging/best-window?hours=3
+It integrates with the UK carbon intensity API and exposes a simple REST interface for:
+- retrieving forecasted daily energy mix,
+- calculating the clean-energy percentage,
+- finding the best charging window for a selected duration.
+
+This is a compact but strong portfolio project because it shows:
+- external API integration,
+- domain-specific data transformation,
+- optimization logic over time-series intervals,
+- clean REST endpoint design,
+- Dockerized deployment.
+
+## Value Proposition
+
+For EV users, charging at the right time can reduce carbon impact without changing hardware. CarCharging turns raw generation-mix data into an actionable recommendation:
+
+- **When should I charge?**
+- **How clean is the grid over the next few days?**
+- **What is the best 1-6 hour charging window in the next 48 hours?**
+
+---
+
+## Features
+
+- **Best charging window calculation** for a user-selected duration
+- **48-hour optimization window** based on forecasted generation data
+- **Daily energy mix summaries** for the coming days
+- **Clean energy percentage calculation** using selected low-carbon sources
+- **Simple REST API** designed for frontend consumption
+- **CORS-enabled endpoints** for web integration
+- **Dockerized runtime** for easy deployment
+- **Frontend-ready backend** with a linked React/TypeScript UI
+
+---
+
+## Tech Stack
+
+| Category | Technologies |
+|---|---|
+| Language | Java 17 |
+| Framework | Spring Boot 3.3.5 |
+| API Style | REST |
+| External Data Source | NESO / UK Carbon Intensity API |
+| Build Tool | Maven |
+| Containerization | Docker |
+| Frontend Consumer | React + TypeScript frontend repo |
+| Testing | Spring Boot Test |
+
+### Stack badges
+![Spring Web](https://img.shields.io/badge/Spring_Web-6DB33F?style=flat-square&logo=spring&logoColor=white)
+![Maven](https://img.shields.io/badge/Maven-Build-C71A36?style=flat-square&logo=apachemaven&logoColor=white)
+![REST](https://img.shields.io/badge/REST-API-005571?style=flat-square)
+![Time Series](https://img.shields.io/badge/Time--Series-Optimization-6A5ACD?style=flat-square)
+
+---
+
+### High-level flow
+
+```text
+Frontend / Client
+      |
+      v
+Spring Boot REST Controllers
+      |
+      v
+Service Layer
+  |             |
+  |             +--> Charging window optimization
+  |
+  +-----------------> Carbon intensity API client
+                         |
+                         v
+                 UK generation forecast data
 ```
 
-returns
+### Main modules
+
+```text
+client/
+config/
+controller/
+model/dto/
+model/external/
+service/
+util/
+```
+
+### Main components
+- `CarbonIntensityClient` - fetches external generation data
+- `EnergyService` - aggregates daily energy mix and clean-energy percentage
+- `ChargingService` - computes the best charging window
+- `ChargingController` - exposes charging recommendation endpoint
+- `EnergyController` - exposes energy mix endpoint
+
+---
+
+## Project Structure
+
+```text
+src/main/java/org/qualv13/carcharging/
+├── client/
+│   └── CarbonIntensityClient.java
+├── config/
+│   ├── RestClientConfig.java
+│   └── WebConfig.java
+├── controller/
+│   ├── ChargingController.java
+│   └── EnergyController.java
+├── model/
+│   ├── dto/
+│   │   ├── ChargingWindowDto.java
+│   │   └── DailyMixDto.java
+│   └── external/
+│       ├── CarbonApiResponse.java
+│       ├── FuelMix.java
+│       └── GenerationData.java
+├── service/
+│   ├── ChargingService.java
+│   └── EnergyService.java
+├── util/
+│   └── EnergyConstants.java
+└── CarChargingApplication.java
+```
+
+---
+
+## Installation and Setup
+
+## Prerequisites
+
+- Java 17
+- Maven 3.9+
+- Docker
+
+## Run locally with Maven
+
+```bash
+git clone https://github.com/qualv13/CarCharging.git
+cd CarCharging
+mvn spring-boot:run
+```
+
+The application starts as a standard Spring Boot service on port `8080` unless overridden.
+
+## Run with Docker
+
+```bash
+git clone https://github.com/qualv13/CarCharging.git
+cd CarCharging
+docker build -t carcharging .
+docker run -p 8080:8080 carcharging
+```
+
+### Verified Dockerfile behavior
+- Builds with `maven:3.9.6-eclipse-temurin-17`
+- Runs on `eclipse-temurin:17-jre-alpine`
+- Exposes port `8080`
+
+---
+
+## Usage Examples
+
+## Get the best charging window for 3h charging
+
+```bash
+curl "http://localhost:8080/api/charging/best-window?hours=3"
+```
+
+### Example response
+
 ```json
 {
   "startTime": "2025-12-01T02:30Z",
   "endTime": "2025-12-01T05:30Z",
-  "cleanEnergyPercent": 78.39999999999999
+  "cleanEnergyPercent": 78.4
 }
 ```
 
-### Forecasted mix of energy an % of clean
-```http
-GET /api/energy/mix
+## Get forecasted daily energy mix
+
+```bash
+curl "http://localhost:8080/api/energy/mix"
 ```
 
-returns
+### Example response
+
 ```json
 [
   {
@@ -53,89 +230,189 @@ returns
       "nuclear": 13.022916666666665,
       "wind": 33.49999999999999
     }
-  },
-  {
-    "date": "2025-12-01",
-    "cleanEnergyPercent": 66.11956521739131,
-    "dailyMix": {
-      "hydro": 0.0,
-      "other": 0.0,
-      "biomass": 7.908695652173911,
-      "imports": 10.423913043478262,
-      "gas": 23.45,
-      "solar": 0.4304347826086956,
-      "coal": 0.0,
-      "nuclear": 11.652173913043478,
-      "wind": 46.12826086956522
-    }
   }
 ]
 ```
 
+## Frontend integration example
 
+```ts
+const response = await fetch("http://localhost:8080/api/charging/best-window?hours=2");
+const data = await response.json();
 
-## 📂 Project structure
+console.log(data.startTime, data.endTime, data.cleanEnergyPercent);
+```
+
+---
+
+## API Documentation
+
+## Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/charging/best-window?hours={n}` | Returns the cleanest charging window for `1-6` hours |
+| GET | `/api/energy/mix` | Returns forecasted daily energy mix and clean-energy percentage |
+
+## Request constraints
+
+### `GET /api/charging/best-window`
+- `hours` must be between **1 and 6**
+- the service evaluates the next **48 hours**
+- the algorithm uses half-hour forecast slots from the external API
+
+If the requested duration cannot be computed from available future data, the service throws an error.
+
+---
+
+## How the Charging Algorithm Works
+
+The charging recommendation logic is simple
+
+### Verified behavior from the service implementation
+- Fetches generation data from **today through the next 3 days**
+- Filters intervals to the next **48 hours**
+- Converts requested hours into **30-minute slots**
+- Computes clean-energy percentage per slot
+- Uses a **sliding window** to find the highest average clean-energy period
+
+### Simplified logic
+
+```java
+int slotsNeeded = hours * 2;
+
+for (int i = 0; i < sortedData.size(); i++) {
+    currentWindowSum += cleanPercentage(sortedData.get(i));
+
+    if (i >= slotsNeeded) {
+        currentWindowSum -= cleanPercentage(sortedData.get(i - slotsNeeded));
+    }
+
+    if (i >= slotsNeeded - 1 && currentWindowSum > maxCleanSum) {
+        maxCleanSum = currentWindowSum;
+        bestStartIndex = i - slotsNeeded + 1;
+    }
+}
+```
+
+This is a good example of applying a classic sliding-window optimization pattern to a real-world sustainability use case.
+
+---
+
+## Screenshots
+
+> Placeholder section for GitHub presentation assets.
+
+### Suggested screenshots
+1. Frontend dashboard overview
+2. Best charging window result card
+3. Daily energy mix chart
+4. API response preview
+5. Architecture diagram
 
 ```text
-src/
-├── main/java/org/qualv13/carcharging/
-│   ├── client/         # API communication
-│   │   └── CarbonIntensityClient    # API from carbonintensity.org.uk
-│   │
-│   ├── config/         # REST config
-│   │   ├── RestClientConfig         # HTTP
-│   │   └── WebConfig                # Web
-│   │
-│   ├── controller/     # Endpoints for frontend
-│   │   ├── ChargingController  
-│   │   └── EnergyController      
-│   │
-│   ├── model/          # Data structures
-│   │   ├── dto/                 # data transfer objects
-│   │   │   ├── ChargingWindowDto
-│   │   │   └── DailyMixDto
-│   │   └── external/            # data from external sources (API)
-│   │       ├── CarbonApiResponse
-│   │       ├── FuelMix
-│   │       └── GenerationData
-│   │
-│   ├── service/        # Logic
-│   │   └── EnergyService            # calculating mix for upcoming days
-│   │   └── ChargingService          # calculating charging window
-│   │
-│   ├── util/           # Utilities
-│   │   └── EnergyConstants          # set of clean energy names
-│   │
-│   └── CarChargingApplication.java  # app start
-│
-└── test/               # Tests
-    └── .../service/
-        ├── ChargingServiceTest      # test of ChargingService.java
-        ├── EnergyServiceIntegrationTest
-        └── EnergyServiceTest        # test of EnergyService.java
+github-readmes/assets/
+├── carcharging-banner.png
+├── carcharging-dashboard.png
+├── carcharging-best-window.png
+├── carcharging-energy-mix.png
+└── carcharging-architecture.png
 ```
-## 🚀 How to run it?
 
-In terminal inside project write
-```bash
-docker build -t carcharging
+---
+
+## Configuration
+
+The verified repository only includes:
+
+```properties
+spring.application.name=CarCharging
 ```
-and then
+
+That means the application is intentionally lightweight and relies primarily on code-level defaults and external API access.
+
+### Operational notes
+- Default runtime port is Spring Boot's standard `8080`
+- Endpoints are annotated with `@CrossOrigin(origins = "*")`
+- No database is required
+- No authentication layer is currently implemented
+
+This simplicity is a strength for a focused API utility service.
+
+---
+
+## Testing
+
+The Maven configuration includes Spring Boot test support.
+
+Run tests with:
+
 ```bash
+mvn test
+```
+
+The repository structure also indicates service-level tests such as:
+- `ChargingServiceTest`
+- `EnergyServiceTest`
+- `EnergyServiceIntegrationTest`
+
+---
+
+## Deployment
+
+## Build JAR
+
+```bash
+mvn clean package
+```
+
+## Run packaged application
+
+```bash
+java -jar target/*.jar
+```
+
+## Run containerized application
+
+```bash
+docker build -t carcharging .
 docker run -p 8080:8080 carcharging
 ```
 
-_I like Docker, okay?_
+### Production improvement ideas
+- Add response caching for external API calls
+- Add OpenAPI/Swagger docs
+- Add validation/error response standardization
+- Add rate limiting and resilience patterns
+- Add CI pipeline and container publishing
+- Add observability metrics
 
-if you don't - sure, here is easier version
+---
 
-```bash
-mvn spring-boot:run
-```
+## Contributing
 
-or in IntelliJ
+Contributions are welcome.
 
-find CarChargingApplication.java in src/main/java/.../carcharging and click "Run" next to class name
+### Suggested workflow
+1. Fork the repository
+2. Create a branch for your change
+3. Keep changes focused and testable
+4. Add or update tests
+5. Open a pull request with a concise summary
 
-## Additional
-Feel free to write DMs to me about service and how to improve my work:D
+### Good contribution areas
+- API documentation
+- caching and resilience
+- richer validation
+- frontend/backend contract improvements
+- deployment automation
+
+---
+
+## Contact and Links
+
+- GitHub profile: [qualv13](https://github.com/qualv13)
+- Repository: [qualv13/CarCharging](https://github.com/qualv13/CarCharging)
+- Frontend repo: [qualv13/nextjs-render](https://github.com/qualv13/nextjs-render)
+- Live preview: [nextjs-render-fuqh.onrender.com](https://nextjs-render-fuqh.onrender.com/)
+
