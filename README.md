@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/carcharging-banner.png" alt="CarCharging banner" width="100%" />
+  <img width="100%" height="42" alt="{DE4329F6-6EAF-4B82-8324-7937D1818AC9}" src="https://github.com/user-attachments/assets/902f128c-4945-4237-acdc-6cbad420b650" />
 </p>
 
 <h1 align="center">CarCharging</h1>
@@ -301,23 +301,10 @@ This is a good example of applying a classic sliding-window optimization pattern
 
 ## Screenshots
 
-> Placeholder section for GitHub presentation assets.
+<img width="267" height="301" alt="{462E77EF-FD64-42F9-82F1-5ACA86030080}" src="https://github.com/user-attachments/assets/1bd2d981-0a94-4ebf-b4c6-d5a3d4794e62" />
+<img width="1074" height="463" alt="{BB9D0CFD-95A8-4F8A-9424-7E7B1D0BF894}" src="https://github.com/user-attachments/assets/e89e8ccb-c944-42cc-a51d-7907a9b2790e" />
+<img width="1086" height="329" alt="{0212E5F0-C149-451D-9DC8-1DD6B8AB1EDD}" src="https://github.com/user-attachments/assets/f33551ba-38d2-415f-a84c-0bed43a51a92" />
 
-### Suggested screenshots
-1. Frontend dashboard overview
-2. Best charging window result card
-3. Daily energy mix chart
-4. API response preview
-5. Architecture diagram
-
-```text
-github-readmes/assets/
-├── carcharging-banner.png
-├── carcharging-dashboard.png
-├── carcharging-best-window.png
-├── carcharging-energy-mix.png
-└── carcharging-architecture.png
-```
 
 ---
 
@@ -335,7 +322,6 @@ That means the application is intentionally lightweight and relies primarily on 
 - Default runtime port is Spring Boot's standard `8080`
 - Endpoints are annotated with `@CrossOrigin(origins = "*")`
 - No database is required
-- No authentication layer is currently implemented
 
 This simplicity is a strength for a focused API utility service.
 
@@ -392,20 +378,6 @@ docker run -p 8080:8080 carcharging
 ## Contributing
 
 Contributions are welcome.
-
-### Suggested workflow
-1. Fork the repository
-2. Create a branch for your change
-3. Keep changes focused and testable
-4. Add or update tests
-5. Open a pull request with a concise summary
-
-### Good contribution areas
-- API documentation
-- caching and resilience
-- richer validation
-- frontend/backend contract improvements
-- deployment automation
 
 ---
 
